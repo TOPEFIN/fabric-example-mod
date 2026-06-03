@@ -1,11 +1,7 @@
-package com.example.mixin;
+package net.fabricmc.example.mixin;
 
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockGetter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,26 +9,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Block.class)
 public class BlockMixin {
-    private static final boolean xrayAktiivinen = true;
 
     @Inject(method = "shouldRenderFace", at = @At("HEAD"), cancellable = true)
-    private static void onShouldRenderFace(BlockState state, BlockGetter level, BlockPos pos, Direction face, BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
-        if (!xrayAktiivinen) return;
+    private static void onShouldRenderFace(BlockState state, Object level, Object pos, Object face, Object blockPos, CallbackInfoReturnable<Boolean> cir) {
+        // Haetaan palikan sisäinen nimi tekstinä (esim. "block.minecraft.diamond_ore")
+        String palikanNimi = state.getBlock().getDescriptionId();
 
-        Block block = state.getBlock();
+        // Määritetään ne tekstinpätkät, jotka halutaan säästää näkyvissä
+        boolean onMalmi = palikanNimi.contains("ore") || 
+                          palikanNimi.contains("chest") || 
+                          palikanNimi.contains("spawner") || 
+                          palikanNimi.contains("portal");
 
-        boolean onArvokas = block == Blocks.DIAMOND_ORE || 
-                            block == Blocks.DEEPSLATE_DIAMOND_ORE ||
-                            block == Blocks.GOLD_ORE || 
-                            block == Blocks.DEEPSLATE_GOLD_ORE ||
-                            block == Blocks.IRON_ORE || 
-                            block == Blocks.DEEPSLATE_IRON_ORE ||
-                            block == Blocks.CHEST ||
-                            block == Blocks.SPAWNER;
-
-        if (onArvokas) {
+        if (onMalmi) {
+            // Jos palikka on malmi tai arkku, se pakotetaan näkymään aina
             cir.setReturnValue(true);
         } else {
+            // Kaikki muu (kivi, multa, hiekka) muuttuu näkymättömäksi
             cir.setReturnValue(false);
         }
     }
