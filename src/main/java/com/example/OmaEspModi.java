@@ -1,54 +1,41 @@
 package com.example;
 
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class OmaEspModi implements ClientModInitializer {
-    private static final boolean ESP_PAALLA = true;
-    private static final int SATEY_VALI = 15; // Kuinka monta palikkaa ympäriltä etsitään
+public class OmaEspModi implements ModInitializer, ClientModInitializer {
+    private static final int ETSI_SADE = 10;
+
+    @Override
+    public void onInitialize() {
+        // Pääalustus valmis
+    }
 
     @Override
     public void onInitializeClient() {
-        // Rekisteröidään ESP piirtymään aina, kun peli renderöi maailmaa
-        WorldRenderEvents.LAST.register(context -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || mc.level == null || !ESP_PAALLA) return;
+        // Kuunnellaan pelin tickejä renderöinnin sijaan (toimii kaikissa versioissa)
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player == null || client.level == null) return;
 
-            // Haetaan pelaajan nykyinen sijainti pyöristettynä lohkoksi
-            BlockPos pelaajaPos = mc.player.blockPosition();
+            // Ajetaan etsintä vain 5 sekunnin (100 tickin) välein, jotta peli ei lagi
+            if (client.player.tickCount % 100 == 0) {
+                BlockPos pPos = client.player.blockPosition();
 
-            // Selaataan pelaajan ympärillä oleva alue (X, Y, Z -akselit)
-            for (int x = -SATEY_VALI; x <= SATEY_VALI; x++) {
-                for (int y = -SATEY_VALI; y <= SATEY_VALI; y++) {
-                    for (int z = -SATEY_VALI; z <= SATEY_VALI; z++) {
-                        
-                        BlockPos tilaPos = pelaajaPos.offset(x, y, z);
-                        BlockState tila = mc.level.getBlockState(tilaPos);
+                for (int x = -ETSI_SADE; x <= ETSI_SADE; x++) {
+                    for (int y = -ETSI_SADE; y <= ETSI_SADE; y++) {
+                        for (int z = -ETSI_SADE; z <= ETSI_SADE; z++) {
+                            
+                            BlockPos tilaPos = pPos.offset(x, y, z);
+                            BlockState tila = client.level.getBlockState(tilaPos);
 
-                        // Tarkistetaan, onko palikka Timantti vai Netherite (Ancient Debris)
-                        boolean onKohde = tila.is(Blocks.DIAMOND_ORE) || 
-                                          tila.is(Blocks.DEEPSLATE_DIAMOND_ORE) || 
-                                          tila.is(Blocks.ANCIENT_DEBRIS);
-
-                        if (onKohde) {
-                            // Lasketaan 3D-laatikon paikka kameran sijaintiin nähden
-                            double peliX = tilaPos.getX() - context.camera().getPosition().x;
-                            double peliY = tilaPos.getY() - context.camera().getPosition().y;
-                            double peliZ = tilaPos.getZ() - context.camera().getPosition().z;
-
-                            // Piirretään punainen 3D-ääriviivalaatikko (ESP) palikan ympärille
-                            LevelRenderer.renderLineBox(
-                                context.matrixStack(),
-                                context.consumers().getBuffer(net.minecraft.client.renderer.RenderType.lines()),
-                                peliX, peliY, peliZ,
-                                peliX + 1, peliY + 1, peliZ + 1,
-                                1.0F, 0.0F, 0.0F, 1.0F // Punainen väri (R, G, B, Alpha)
-                            );
+                            if (tila.is(Blocks.DIAMOND_ORE) || tila.is(Blocks.DEEPSLATE_DIAMOND_ORE)) {
+                                // Tulostetaan timantin paikka suoraan lokitietoihin
+                                System.out.println("[OmaXray] TIMANTTI LÖYDETTY: X:" + tilaPos.getX() + " Y:" + tilaPos.getY() + " Z:" + tilaPos.getZ());
+                            }
                         }
                     }
                 }
