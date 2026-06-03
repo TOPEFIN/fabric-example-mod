@@ -19,7 +19,9 @@
 			"com.example.ExampleMod"
 		],
 		"client": [
-			"com.example.client.ExampleModClient"
+  "com.example.OmaEspModi"
+]
+
 		]
 	},
 	"mixins": [
