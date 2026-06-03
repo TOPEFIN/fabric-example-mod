@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
-	"version": "${version}",
-	"name": "Example Mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"id": "xraymod",
+	"version": "1.0.0",
+	"name": "Oma ESP Modi",
+	"description": "Custom Block ESP moduuli timanttien etsimiseen.",
 	"authors": [
 		"Me!"
 	],
@@ -12,16 +12,11 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
+	"icon": "assets/xraymod/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [
-			"com.example.ExampleMod"
-		],
 		"client": [
-  "com.example.OmaEspModi"
-]
-
+			"com.example.OmaEspModi"
 		]
 	},
 	"mixins": [
